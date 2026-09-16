@@ -49,6 +49,11 @@ declaration, one shaded vertical band per Lean version, integer coordinates so t
 renders identical bytes. The daily Kestra flow `kbm.novacula/novacula-daily` runs this on the
 latest stable Lean and pushes the result.
 
+## Two clones push to main
+
+The daily flow works in its own clone (`~/Desktop/selfhosting/novacula/work`) and pushes the
+day's data and chart. Always `git pull --rebase origin main` before pushing from a dev clone.
+
 ## Tests
 
 - Toy fixtures without Mathlib for every principle in DESIGN.md section 11; these must stay fast.
