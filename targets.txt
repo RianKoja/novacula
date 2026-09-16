@@ -1,0 +1,17 @@
+# Tracked declarations: one "Module Decl" per line.
+# Remarkable results first, then toy fixtures used as a sanity baseline.
+# Mathlib and external repositories join this list once the dependency walk lands (DESIGN.md 4.2).
+
+Init Nat.add_comm
+Init Nat.le_antisymm
+Init Nat.div_add_mod
+Init Nat.sub_one_lt
+Init List.length_append
+Init List.reverse_reverse
+Init Array.size_push
+Init Nat.strongRecOn
+
+Fixtures Fixtures.addComm
+Fixtures Fixtures.branchy
+Fixtures Fixtures.decBig
+Fixtures Fixtures.natively

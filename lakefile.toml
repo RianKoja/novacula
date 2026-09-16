@@ -1,0 +1,14 @@
+name = "novacula"
+defaultTargets = ["novacula"]
+
+[[lean_lib]]
+name = "Novacula"
+
+[[lean_lib]]
+name = "Fixtures"
+srcDir = "test"
+
+[[lean_exe]]
+name = "novacula"
+root = "Main"
+supportInterpreter = true

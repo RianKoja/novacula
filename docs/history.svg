@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" font-family="sans-serif">
+<rect width="1000" height="520" fill="#ffffff"/>
+<rect x="70" y="46" width="680" height="410" fill="#eef2f7"/>
+<line x1="70" y1="46" x2="70" y2="456" stroke="#c7d2de" stroke-width="1"/>
+<text x="410" y="34" font-size="12" fill="#44546a" text-anchor="middle">Lean 4.34.0</text>
+<line x1="70" y1="456" x2="750" y2="456" stroke="#333" stroke-width="1"/>
+<line x1="70" y1="46" x2="70" y2="456" stroke="#333" stroke-width="1"/>
+<text x="60" y="50" font-size="11" fill="#333" text-anchor="end">207</text>
+<text x="60" y="456" font-size="11" fill="#333" text-anchor="end">0</text>
+<text x="20" y="251" font-size="12" fill="#333" transform="rotate(-90 20 251)" text-anchor="middle">size</text>
+<text x="410" y="474" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-35 410 474)">2026-09-16</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2" points="410,389"/>
+<circle cx="410" cy="389" r="3" fill="#1f77b4"/>
+<text x="764" y="60" font-size="11" fill="#1f77b4">Init.Nat.add_comm</text>
+<polyline fill="none" stroke="#d62728" stroke-width="2" points="410,298"/>
+<circle cx="410" cy="298" r="3" fill="#d62728"/>
+<text x="764" y="78" font-size="11" fill="#d62728">Init.Nat.le_antisymm</text>
+<polyline fill="none" stroke="#2ca02c" stroke-width="2" points="410,342"/>
+<circle cx="410" cy="342" r="3" fill="#2ca02c"/>
+<text x="764" y="96" font-size="11" fill="#2ca02c">Init.Nat.div_add_mod</text>
+<polyline fill="none" stroke="#9467bd" stroke-width="2" points="410,377"/>
+<circle cx="410" cy="377" r="3" fill="#9467bd"/>
+<text x="764" y="114" font-size="11" fill="#9467bd">Init.Nat.sub_one_lt</text>
+<polyline fill="none" stroke="#ff7f0e" stroke-width="2" points="410,46"/>
+<circle cx="410" cy="46" r="3" fill="#ff7f0e"/>
+<text x="764" y="132" font-size="11" fill="#ff7f0e">Init.List.length_append</text>
+<polyline fill="none" stroke="#17becf" stroke-width="2" points="410,324"/>
+<circle cx="410" cy="324" r="3" fill="#17becf"/>
+<text x="764" y="150" font-size="11" fill="#17becf">Init.List.reverse_reverse</text>
+<polyline fill="none" stroke="#8c564b" stroke-width="2" points="410,357"/>
+<circle cx="410" cy="357" r="3" fill="#8c564b"/>
+<text x="764" y="168" font-size="11" fill="#8c564b">Init.Array.size_push</text>
+<polyline fill="none" stroke="#e377c2" stroke-width="2" points="410,375"/>
+<circle cx="410" cy="375" r="3" fill="#e377c2"/>
+<text x="764" y="186" font-size="11" fill="#e377c2">Init.Nat.strongRecOn</text>
+<polyline fill="none" stroke="#7f7f7f" stroke-width="2" points="410,403"/>
+<circle cx="410" cy="403" r="3" fill="#7f7f7f"/>
+<text x="764" y="204" font-size="11" fill="#7f7f7f">Fixtures.Fixtures.addComm</text>
+<polyline fill="none" stroke="#bcbd22" stroke-width="2" points="410,249"/>
+<circle cx="410" cy="249" r="3" fill="#bcbd22"/>
+<text x="764" y="222" font-size="11" fill="#bcbd22">Fixtures.Fixtures.branchy</text>
+<polyline fill="none" stroke="#1f77b4" stroke-width="2" points="410,318"/>
+<circle cx="410" cy="318" r="3" fill="#1f77b4"/>
+<text x="764" y="240" font-size="11" fill="#1f77b4">Fixtures.Fixtures.decBig</text>
+<polyline fill="none" stroke="#d62728" stroke-width="2" points="410,344"/>
+<circle cx="410" cy="344" r="3" fill="#d62728"/>
+<text x="764" y="258" font-size="11" fill="#d62728">Fixtures.Fixtures.natively</text>
+</svg>
