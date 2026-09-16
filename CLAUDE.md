@@ -24,7 +24,8 @@ Deterministic complexity cost for correct Lean 4 proofs. Lower cost means easier
 
     make test                               # build everything and run the selftest
     make score MODULE=Fixtures DECL=Fixtures.branchy
-    make track                              # append today's metrics to data/history.csv
+    make track                              # append today's metrics and redraw the chart
+    make chart                              # redraw docs/history.svg only
     make history                            # last rows of the history
 
 Under the hood:
@@ -43,7 +44,10 @@ checkers are reported as `not-configured` and `gate.ok` stays false.
 `make track` appends one row per declaration in `targets.txt` to `data/history.csv`, tagged with
 the date and Novacula revision passed in by the Makefile. The tool never reads a clock, so an
 old revision reproduces its old rows. Reruns on the same date and revision are no-ops.
-The README chart is not built yet: add it once there is enough history to plot.
+`make track` then redraws `docs/history.svg`, the chart shown in README.md: one line per tracked
+declaration, one shaded vertical band per Lean version, integer coordinates so the same history
+renders identical bytes. The daily Kestra flow `kbm.novacula/novacula-daily` runs this on the
+latest stable Lean and pushes the result.
 
 ## Tests
 
