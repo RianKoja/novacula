@@ -119,3 +119,15 @@ date,novaculaRev,module,decl,gateOk,axiomsOk,size,consts,binderDepth,branches,di
 2026-09-24,b20f580,Fixtures,Fixtures.branchy,false,true,105,18,3,1,18,4.34.0
 2026-09-24,b20f580,Fixtures,Fixtures.decBig,false,true,70,17,3,0,17,4.34.0
 2026-09-24,b20f580,Fixtures,Fixtures.natively,false,true,57,13,3,0,13,4.34.0
+2026-09-25,a061b18,Init,Nat.add_comm,false,true,34,7,4,1,7,4.34.1
+2026-09-25,a061b18,Init,Nat.le_antisymm,false,true,80,13,7,0,13,4.34.1
+2026-09-25,a061b18,Init,Nat.div_add_mod,false,true,58,15,2,0,15,4.34.1
+2026-09-25,a061b18,Init,Nat.sub_one_lt,false,true,40,10,2,0,10,4.34.1
+2026-09-25,a061b18,Init,List.length_append,false,true,207,24,6,1,24,4.34.1
+2026-09-25,a061b18,Init,List.reverse_reverse,false,true,67,10,3,0,10,4.34.1
+2026-09-25,a061b18,Init,Array.size_push,false,true,50,12,3,0,12,4.34.1
+2026-09-25,a061b18,Init,Nat.strongRecOn,false,true,41,7,5,0,7,4.34.1
+2026-09-25,a061b18,Fixtures,Fixtures.addComm,false,true,27,6,2,0,6,4.34.1
+2026-09-25,a061b18,Fixtures,Fixtures.branchy,false,true,105,18,3,1,18,4.34.1
+2026-09-25,a061b18,Fixtures,Fixtures.decBig,false,true,70,17,3,0,17,4.34.1
+2026-09-25,a061b18,Fixtures,Fixtures.natively,false,true,57,13,3,0,13,4.34.1
