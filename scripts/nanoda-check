@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# NANODA adapter for novacula. Called as `nanoda-check <Module> <Decl>...`: exports the
+# declarations with everything they depend on (lean4export) and checks the export with nanoda.
+# Run under `lake env` so lean4export finds the modules. Needs LEAN4EXPORT and NANODA_BIN.
+set -euo pipefail
+mod=$1; shift
+cfg=$(mktemp)
+trap 'rm -f "$cfg"' EXIT
+# Axioms are judged by novacula's own gate; nanoda only reports them.
+cat > "$cfg" <<'JSON'
+{"use_stdin": true,
+ "permitted_axioms": ["propext", "Classical.choice", "Quot.sound"],
+ "unpermitted_axiom_hard_error": false,
+ "nat_extension": true,
+ "string_extension": true,
+ "print_success_message": true}
+JSON
+"$LEAN4EXPORT" "$mod" -- "$@" | "$NANODA_BIN" "$cfg"

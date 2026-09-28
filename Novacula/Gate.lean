@@ -1,4 +1,4 @@
-import Novacula.Term
+import Novacula.Graph
 
 /-! Correctness gate (DESIGN.md 5). Novacula never judges correctness itself: it walks the
 kernel terms for axioms and delegates checking to lean4checker and nanoda. -/
@@ -21,20 +21,8 @@ def isNativeAxiom (n : Name) : Bool :=
 
 def isSanctioned (n : Name) : Bool := sanctionedAxioms.contains n || isNativeAxiom n
 
-/-- Every constant reachable from `root` through kernel terms. -/
-partial def reachable (env : Environment) (root : Name) : NameSet :=
-  go root {}
-where
-  go (n : Name) (acc : NameSet) : NameSet :=
-    if acc.contains n then acc
-    else
-      let acc := acc.insert n
-      match env.find? n with
-      | none => acc
-      | some ci => (directDeps ci).foldl (fun acc d => go d acc) acc
-
 def axiomsOf (env : Environment) (root : Name) : Array Name :=
-  let names := (reachable env root).foldl (fun (acc : Array Name) n =>
+  let names := (closure env #[root]).fold (fun (acc : Array Name) n _ =>
     match env.find? n with
     | some (.axiomInfo _) => acc.push n
     | _ => acc) #[]
@@ -49,38 +37,46 @@ def CheckerResult.toJson : CheckerResult → Json
   | .fail m => Json.mkObj [("fail", m)]
   | .notConfigured => "not-configured"
 
-/-- Run an external checker if its executable path is configured, e.g. `LEAN4CHECKER=/path/to/exe`.
-`ponytail:` invocation only, no output parsing beyond the exit code; refine when a checker needs it. -/
-def runChecker (envVar : String) (mod : Name) : IO CheckerResult := do
-  match (← IO.getEnv envVar) with
-  | none => return .notConfigured
-  | some exe =>
-    let out ← IO.Process.output { cmd := exe, args := #[mod.toString] }
-    if out.exitCode == 0 then return .pass
-    else return .fail (out.stderr.take 500).toString
+/-- Run an external checker once per argument list, if its executable is configured, e.g.
+`LEAN4CHECKER=/path/to/exe`. Passes only if every run exits 0. -/
+def runChecker (envVar : String) (runs : Array (Array String)) : IO CheckerResult := do
+  let some exe ← IO.getEnv envVar | return .notConfigured
+  for args in runs do
+    let out ← IO.Process.output { cmd := exe, args }
+    if out.exitCode != 0 then
+      return .fail s!"{args}: {(out.stderr ++ out.stdout).take 500}"
+  return .pass
+
+structure Checkers where
+  lean4checker : CheckerResult
+  nanoda : CheckerResult
+
+/-- Run both checkers for the targets of one module. lean4checker replays every module of the
+scored package, `exe <Module>`. nanoda is called as `exe <Module> <Decl>...`, a wrapper that
+exports those declarations with their dependencies (lean4export) and checks the export. -/
+def runCheckers (env : Environment) (mod : Name) (targets : Array Name) : IO Checkers := do
+  let pkgMods := (← localModules env).toArray
+  return {
+    lean4checker := ← runChecker "LEAN4CHECKER" (pkgMods.map fun m => #[m.toString])
+    nanoda := ← runChecker "NANODA" #[#[mod.toString] ++ targets.map (·.toString)] }
 
 structure GateResult where
   axioms : Array Name
   unsanctioned : Array Name
-  lean4checker : CheckerResult
-  nanoda : CheckerResult
+  checkers : Checkers
 
 def GateResult.ok (g : GateResult) : Bool :=
-  g.unsanctioned.isEmpty && g.lean4checker == .pass && g.nanoda == .pass
+  g.unsanctioned.isEmpty && g.checkers.lean4checker == .pass && g.checkers.nanoda == .pass
 
 def GateResult.toJson (g : GateResult) : Json := Json.mkObj
   [("axioms", Json.arr (g.axioms.map (Json.str ·.toString))),
    ("unsanctioned", Json.arr (g.unsanctioned.map (Json.str ·.toString))),
-   ("lean4checker", g.lean4checker.toJson),
-   ("nanoda", g.nanoda.toJson),
+   ("lean4checker", g.checkers.lean4checker.toJson),
+   ("nanoda", g.checkers.nanoda.toJson),
    ("ok", g.ok)]
 
-def gate (env : Environment) (mod : Name) (root : Name) : IO GateResult := do
+def gate (env : Environment) (root : Name) (checkers : Checkers) : GateResult :=
   let axioms := axiomsOf env root
-  return {
-    axioms
-    unsanctioned := axioms.filter (!isSanctioned ·)
-    lean4checker := ← runChecker "LEAN4CHECKER" mod
-    nanoda := ← runChecker "NANODA" mod }
+  { axioms, unsanctioned := axioms.filter (!isSanctioned ·), checkers }
 
 end Novacula

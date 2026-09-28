@@ -15,12 +15,23 @@ structure TermMetrics where
   binderDepth : Nat := 0
   /-- Distinct case splits: recursors, `casesOn`, matchers. -/
   branches : Nat := 0
+  /-- Distinct nodes of the statement alone: what a reader of a citation has to take in. -/
+  typeSize : Nat := 0
   deriving Repr, Inhabited, BEq
 
 instance : ToJson TermMetrics where
   toJson m := Json.mkObj
     [("size", m.size), ("consts", m.consts),
-     ("binderDepth", m.binderDepth), ("branches", m.branches)]
+     ("binderDepth", m.binderDepth), ("branches", m.branches), ("typeSize", m.typeSize)]
+
+/-- Compact form for the cache, in field order. -/
+def TermMetrics.toArray (m : TermMetrics) : Array Nat :=
+  #[m.size, m.consts, m.binderDepth, m.branches, m.typeSize]
+
+def TermMetrics.ofArray? : Array Nat → Option TermMetrics
+  | #[size, consts, binderDepth, branches, typeSize] =>
+    some { size, consts, binderDepth, branches, typeSize }
+  | _ => none
 
 /-- Does this constant introduce a case split? -/
 def isBranchConst (env : Environment) (n : Name) : Bool :=
@@ -63,12 +74,14 @@ private partial def visit (env : Environment) (e : Expr) (depth : Nat) : StateM 
 def termMetrics (env : Environment) (ci : ConstantInfo) : TermMetrics :=
   let run := do
     visit env ci.type 0
+    let typeSize := (← get).size
     match ci.value? (allowOpaque := true) with
     | some v => visit env v 0
     | none => pure ()
-  let st := (run.run {}).2
+    return typeSize
+  let (typeSize, st) := run.run {}
   { size := st.size, consts := st.consts.size
-    binderDepth := st.binderDepth, branches := st.branches }
+    binderDepth := st.binderDepth, branches := st.branches, typeSize }
 
 /-- Constants a declaration refers to, type and value together. -/
 def directDeps (ci : ConstantInfo) : NameSet :=

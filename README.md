@@ -1,17 +1,19 @@
 # Novacula
 
 A deterministic complexity metric for Lean 4 proofs. Lower is better: a large gap between two
-proofs of the same theorem should mean one of them is much easier for a human to understand.
+proofs of the same theorem should mean that one of them is much easier for a human to understand
+completely.
 
-The name is from *novacula Occami*, Occam's razor. Cutting away what a proof does not need is
-what the metric rewards.
+The name comes from *novacula Occami*, Occam's razor. The metric rewards cutting away what a proof
+does not need.
 
-Novacula does not check proofs. Correctness is a precondition: lean4checker and nanoda must
-pass and the axioms must be in the sanctioned set, or nothing gets scored.
+Novacula does not check proofs. Correctness is a precondition: `leanchecker` and nanoda must
+accept the proof and its axioms must be in the sanctioned set, or Novacula reports no cost.
 
-## The idea in one formula
+## The formula
 
-Fame decides how much of a dependency you pay for:
+The cost is recursive: every declaration a theorem reaches, down to the axioms, is costed by the
+same rule. Fame decides how much of each one is charged:
 
 ```
 w(T) = 1
@@ -20,40 +22,83 @@ w(v) = max over edges u → v of  w(u) · (1 − fame(u))
 cost(T) = Σ over reachable d of  w(d) · ( fame(d) · cite(d) + (1 − fame(d)) · body(d) )
 ```
 
-- Citing a famous theorem is cheap, and you do not pay for the proof behind it.
-- Citing something nobody uses costs about what copying its proof into your file would, so
-  splitting a proof across repositories to hide complexity gains nothing.
-- Definitions work the same way: "let f be continuous" is cheap, spelling out epsilon-delta by
-  hand is not, and a rarely used condition sits in between.
-- Computation is free, code is not: a `decide` over a range of 10000 costs what the same check
-  over a range of 10 costs, because a human accepts a finished check either way.
+`body(d)` is the size of `d`'s kernel term and `cite(d)` the size of its statement.
 
-`DESIGN.md` has the full model, the principles behind it, and the open questions.
+- Citing a famous theorem costs about its statement; the proof behind it is barely charged.
+- Citing a declaration nobody else uses costs about what copying its proof would, so splitting a
+  proof across repositories to hide complexity gains nothing.
+- Definitions follow the same rule. "Let f be continuous" is cheap, spelling out epsilon-delta is
+  not, and a rarely used condition sits in between.
+- A lemma reached along many paths is charged once.
+- Computation is free, code is not. A `decide` over a range of 200 costs the same as over a range
+  of 20, because a human accepts a finished check either way.
+
+Raw metrics per declaration are cached per module and reused while the Lean version is unchanged.
+Fame is applied only after all of them are known. `DESIGN.md` has the full model, the reasons
+behind each rule, and the open questions.
 
 ## Metric history
 
-Tracked declarations are scored daily and appended to `data/history.csv`. Each shaded band is one
-Lean version: a step at a band edge is the toolchain's doing, while movement inside a band comes
-from the proofs themselves or from shifting fame of what they cite.
+The declarations in `targets.txt` are scored daily and appended to `data/history.csv`. Each shaded
+band is one Lean version: a step at a band edge comes from the toolchain, while movement inside a
+band comes from the proofs or from changes in the fame of what they cite.
 
 ![Metric history](docs/history.svg)
 
-## Usage
+## Use in a Lean project
+
+Add a job to the project's CI, plus a schedule for periodic reruns:
+
+```yaml
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly
+
+jobs:
+  novacula:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: RianKoja/novacula@main
+        with:
+          theorems: all   # or title theorems: "Foo.main_theorem Foo.corollary"
+```
+
+The action builds the project, rebuilds Novacula and the checkers on the project's own toolchain,
+and scores the selected theorems. Each run writes a table to the job summary. Runs on the default
+branch, scheduled runs and manual runs also update `history.csv`, `history.svg` and `badge.svg` on
+a `novacula` branch, which the README can show:
+
+```markdown
+![Novacula](https://raw.githubusercontent.com/OWNER/REPO/novacula/badge.svg)
+![Novacula history](https://raw.githubusercontent.com/OWNER/REPO/novacula/history.svg)
+```
+
+The badge shows the cost of all selected theorems scored together and the Lean version it was
+computed on. Other inputs: `module`, `corpus`, `branch`, `push`, `nanoda-rev` (see `action.yml`).
+
+## Local use
 
 ```
 make test                                       # build and run the selftest
-make score MODULE=Init DECL=Nat.add_comm        # JSON report for one declaration
+make score MODULE=Fixtures DECL=Fixtures.branchy
 make track                                      # append today's metrics and redraw the chart
 make chart                                      # redraw the chart only
 ```
 
-External checkers run only when configured:
+To score another project, build Novacula with that project's `lean-toolchain` and run it inside
+the project with the checkers configured:
 
 ```
-LEAN4CHECKER=/path/to/exe NANODA=/path/to/exe make score MODULE=... DECL=...
+LEAN4CHECKER=leanchecker NANODA=/path/to/novacula/scripts/nanoda-check \
+LEAN4EXPORT=/path/to/lean4export NANODA_BIN=/path/to/nanoda_bin NOVACULA_CORPUS=Mathlib \
+  lake env /path/to/novacula score MyProject MyProject.main_theorem
 ```
 
 ## Status
 
-Early. The correctness gate, the term metrics, the history tracking and this chart work. The
-fame-weighted dependency walk, the syntax metrics and the weight profiles are next, in that order.
+Built: correctness gate, term metrics, recursive cost with interim in-degree fame, raw-metric
+cache, history chart, badge, and the GitHub Action. Next: syntax metrics, weight profiles, and a
+fame snapshot with repository stars.

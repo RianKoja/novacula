@@ -1,0 +1,175 @@
+name: Novacula
+description: >-
+  Score the theorems of a Lean 4 project with Novacula, keep their history on a branch, and
+  draw a README badge and chart.
+branding:
+  icon: scissors
+  color: blue
+
+inputs:
+  theorems:
+    description: >-
+      `all` for every user-written theorem of the module and its submodules, or a
+      whitespace-separated list of declaration names ("title theorems").
+    default: all
+  module:
+    description: Root module to score, e.g. `MscProofs`. Defaults to the package name in lake-manifest.json.
+    default: ""
+  corpus:
+    description: >-
+      Modules imported only to measure fame on. Defaults to `Mathlib` when the project depends on
+      Mathlib, so fame does not depend on which part of Mathlib the project imports.
+    default: auto
+  branch:
+    description: Branch that holds history.csv, history.svg and badge.svg.
+    default: novacula
+  push:
+    description: >-
+      `auto` pushes the history only for pushes to the default branch, scheduled runs and manual
+      runs. `true` or `false` force it.
+    default: auto
+  nanoda-rev:
+    description: nanoda_lib commit used for the second kernel check.
+    default: 3a2407216ee84a75f9e1aead6803d0578be06ae7
+
+outputs:
+  cost:
+    description: Cost of all selected theorems scored together (empty if the gate rejected them).
+    value: ${{ steps.score.outputs.cost }}
+  lean-version:
+    description: Lean version the scores were computed on.
+    value: ${{ steps.score.outputs.lean }}
+
+runs:
+  using: composite
+  steps:
+    - uses: leanprover/lean-action@v1
+      with:
+        build: true
+        test: false
+        lint: false
+
+    - name: Build Novacula on the project's toolchain
+      shell: bash
+      run: |
+        rm -rf "$RUNNER_TEMP/novacula"
+        cp -r "$GITHUB_ACTION_PATH" "$RUNNER_TEMP/novacula"
+        cp lean-toolchain "$RUNNER_TEMP/novacula/lean-toolchain"
+        (cd "$RUNNER_TEMP/novacula" && lake build novacula)
+
+    - name: Build lean4export
+      shell: bash
+      run: |
+        ver=$(sed 's/.*:v//' lean-toolchain)
+        tags=$(git ls-remote --tags https://github.com/leanprover/lean4export | sed 's|.*refs/tags/||')
+        tag=""
+        for t in "v$ver" "v${ver%.*}.0"; do
+          if grep -qx "$t" <<<"$tags"; then tag=$t; break; fi
+        done
+        if [ -z "$tag" ]; then echo "::error::no lean4export tag for Lean $ver"; exit 1; fi
+        git clone -q --depth 1 -b "$tag" https://github.com/leanprover/lean4export "$RUNNER_TEMP/lean4export"
+        cp lean-toolchain "$RUNNER_TEMP/lean4export/"
+        (cd "$RUNNER_TEMP/lean4export" && lake build)
+
+    - uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/nanoda_lib/target
+        key: nanoda-${{ inputs.nanoda-rev }}
+
+    - name: Build nanoda
+      shell: bash
+      run: |
+        [ -d "$RUNNER_TEMP/nanoda_lib/.git" ] || git clone -q https://github.com/ammkrn/nanoda_lib "$RUNNER_TEMP/nanoda_lib"
+        git -C "$RUNNER_TEMP/nanoda_lib" checkout -q "${{ inputs.nanoda-rev }}"
+        cargo build -q --release --manifest-path "$RUNNER_TEMP/nanoda_lib/Cargo.toml"
+
+    # Raw metrics depend only on the Lean version and each module's olean, so they are reused
+    # across runs; costs are always recomputed from them.
+    - uses: actions/cache@v4
+      with:
+        path: .lake/novacula-cache
+        key: novacula-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+        restore-keys: novacula-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+    - name: Score
+      id: score
+      shell: bash
+      env:
+        THEOREMS: ${{ inputs.theorems }}
+        MODULE: ${{ inputs.module }}
+        CORPUS: ${{ inputs.corpus }}
+      run: |
+        mod=${MODULE:-$(jq -r .name lake-manifest.json)}
+        if [ "$CORPUS" = auto ]; then
+          CORPUS=$(jq -r 'if any(.packages[]; .name == "mathlib") then "Mathlib" else "" end' lake-manifest.json)
+        fi
+        targets="$RUNNER_TEMP/novacula-targets.txt"
+        if [ "$THEOREMS" = all ]; then
+          echo "$mod *" > "$targets"
+        else
+          for t in $THEOREMS; do echo "$mod $t"; done > "$targets"
+        fi
+        nov="$RUNNER_TEMP/novacula"
+        export NOVACULA_CORPUS="$CORPUS" LEAN4CHECKER=leanchecker NANODA="$nov/scripts/nanoda-check"
+        export LEAN4EXPORT="$RUNNER_TEMP/lean4export/.lake/build/bin/lean4export"
+        export NANODA_BIN="$RUNNER_TEMP/nanoda_lib/target/release/nanoda_bin"
+        rev=$(git -C "$GITHUB_ACTION_PATH" rev-parse --short HEAD 2>/dev/null || echo "${GITHUB_ACTION_REF:-unknown}")
+        # The tool never reads a clock: the date is passed in.
+        lake env "$nov/.lake/build/bin/novacula" csv "$(date -u +%F)" "$rev" "$targets" > "$RUNNER_TEMP/novacula-rows.csv"
+        lean=$(tail -n 1 "$RUNNER_TEMP/novacula-rows.csv" | cut -d, -f12)
+        cost=$(awk -F, 'END { print $13 }' "$RUNNER_TEMP/novacula-rows.csv")
+        echo "cost=$cost" >> "$GITHUB_OUTPUT"
+        echo "lean=$lean" >> "$GITHUB_OUTPUT"
+        {
+          echo "### Novacula on Lean $lean"
+          echo
+          echo "| declaration | gate | cost |"
+          echo "|---|---|---:|"
+          awk -F, '{ printf "| `%s` | %s | %s |\n", $4, ($5 == "true" ? "pass" : "rejected"), $13 }' "$RUNNER_TEMP/novacula-rows.csv"
+          echo
+          echo "Corpus for fame: ${CORPUS:-none}. Lower cost means easier to understand fully."
+        } >> "$GITHUB_STEP_SUMMARY"
+        # Unchecked proofs are rejected, never scored.
+        if awk -F, '$5 != "true" { bad = 1 } END { exit !bad }' "$RUNNER_TEMP/novacula-rows.csv"; then
+          echo "::error::the correctness gate rejected some declarations, see the job summary"
+          exit 1
+        fi
+
+    - name: Update history, chart and badge
+      shell: bash
+      env:
+        BRANCH: ${{ inputs.branch }}
+        PUSH: ${{ inputs.push }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        if [ "$PUSH" = auto ]; then
+          PUSH=false
+          case "$GITHUB_EVENT_NAME" in
+            schedule|workflow_dispatch) PUSH=true ;;
+            push) [ "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH" ] && PUSH=true ;;
+          esac
+        fi
+        hist="$RUNNER_TEMP/novacula-history"
+        nov="$RUNNER_TEMP/novacula/.lake/build/bin/novacula"
+        rm -rf "$hist"
+        if git fetch -q origin "$BRANCH" 2>/dev/null; then
+          git worktree add -q "$hist" FETCH_HEAD
+        else
+          git worktree add -q --detach "$hist"
+          git -C "$hist" checkout -q --orphan "$BRANCH"
+          git -C "$hist" rm -rfq .
+        fi
+        cd "$hist"
+        [ -s history.csv ] || "$nov" csv-header > history.csv
+        # One run per day: a later run replaces the day's rows.
+        today=$(cut -d, -f1 "$RUNNER_TEMP/novacula-rows.csv" | head -n 1)
+        grep -v "^$today," history.csv > history.tmp || true
+        cat "$RUNNER_TEMP/novacula-rows.csv" >> history.tmp
+        mv history.tmp history.csv
+        "$nov" chart history.csv history.svg cost
+        "$nov" badge history.csv badge.svg
+        if [ "$PUSH" != true ]; then echo "not pushing ($GITHUB_EVENT_NAME on $GITHUB_REF_NAME)"; exit 0; fi
+        git add history.csv history.svg badge.svg
+        git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+          commit -q -m "novacula: $today on Lean ${{ steps.score.outputs.lean }} for ${GITHUB_SHA::7}" || exit 0
+        git push -q origin "HEAD:refs/heads/$BRANCH"

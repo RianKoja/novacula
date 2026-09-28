@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" font-family="sans-serif">
-<rect width="1000" height="520" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 520" width="1060" height="520" font-family="sans-serif">
+<rect width="1060" height="520" fill="#ffffff"/>
 <rect x="70" y="46" width="476" height="410" fill="#eef2f7"/>
 <line x1="70" y1="46" x2="70" y2="456" stroke="#c7d2de" stroke-width="1"/>
 <text x="308" y="34" font-size="12" fill="#44546a" text-anchor="middle">Lean 4.34.0</text>
@@ -32,7 +32,7 @@
 <circle cx="630" cy="389" r="3" fill="#1f77b4"/>
 <circle cx="686" cy="389" r="3" fill="#1f77b4"/>
 <circle cx="742" cy="389" r="3" fill="#1f77b4"/>
-<text x="764" y="60" font-size="11" fill="#1f77b4">Init.Nat.add_comm</text>
+<text x="764" y="60" font-size="11" fill="#1f77b4">Nat.add_comm</text>
 <polyline fill="none" stroke="#d62728" stroke-width="2" points="70,298 126,298 182,298 238,298 294,298 350,298 406,298 462,298 518,298 574,298 630,298 686,298 742,298"/>
 <circle cx="70" cy="298" r="3" fill="#d62728"/>
 <circle cx="126" cy="298" r="3" fill="#d62728"/>
@@ -47,7 +47,7 @@
 <circle cx="630" cy="298" r="3" fill="#d62728"/>
 <circle cx="686" cy="298" r="3" fill="#d62728"/>
 <circle cx="742" cy="298" r="3" fill="#d62728"/>
-<text x="764" y="78" font-size="11" fill="#d62728">Init.Nat.le_antisymm</text>
+<text x="764" y="78" font-size="11" fill="#d62728">Nat.le_antisymm</text>
 <polyline fill="none" stroke="#2ca02c" stroke-width="2" points="70,342 126,342 182,342 238,342 294,342 350,342 406,342 462,342 518,342 574,342 630,342 686,342 742,342"/>
 <circle cx="70" cy="342" r="3" fill="#2ca02c"/>
 <circle cx="126" cy="342" r="3" fill="#2ca02c"/>
@@ -62,7 +62,7 @@
 <circle cx="630" cy="342" r="3" fill="#2ca02c"/>
 <circle cx="686" cy="342" r="3" fill="#2ca02c"/>
 <circle cx="742" cy="342" r="3" fill="#2ca02c"/>
-<text x="764" y="96" font-size="11" fill="#2ca02c">Init.Nat.div_add_mod</text>
+<text x="764" y="96" font-size="11" fill="#2ca02c">Nat.div_add_mod</text>
 <polyline fill="none" stroke="#9467bd" stroke-width="2" points="70,377 126,377 182,377 238,377 294,377 350,377 406,377 462,377 518,377 574,377 630,377 686,377 742,377"/>
 <circle cx="70" cy="377" r="3" fill="#9467bd"/>
 <circle cx="126" cy="377" r="3" fill="#9467bd"/>
@@ -77,7 +77,7 @@
 <circle cx="630" cy="377" r="3" fill="#9467bd"/>
 <circle cx="686" cy="377" r="3" fill="#9467bd"/>
 <circle cx="742" cy="377" r="3" fill="#9467bd"/>
-<text x="764" y="114" font-size="11" fill="#9467bd">Init.Nat.sub_one_lt</text>
+<text x="764" y="114" font-size="11" fill="#9467bd">Nat.sub_one_lt</text>
 <polyline fill="none" stroke="#ff7f0e" stroke-width="2" points="70,46 126,46 182,46 238,46 294,46 350,46 406,46 462,46 518,46 574,46 630,46 686,46 742,46"/>
 <circle cx="70" cy="46" r="3" fill="#ff7f0e"/>
 <circle cx="126" cy="46" r="3" fill="#ff7f0e"/>
@@ -92,7 +92,7 @@
 <circle cx="630" cy="46" r="3" fill="#ff7f0e"/>
 <circle cx="686" cy="46" r="3" fill="#ff7f0e"/>
 <circle cx="742" cy="46" r="3" fill="#ff7f0e"/>
-<text x="764" y="132" font-size="11" fill="#ff7f0e">Init.List.length_append</text>
+<text x="764" y="132" font-size="11" fill="#ff7f0e">List.length_append</text>
 <polyline fill="none" stroke="#17becf" stroke-width="2" points="70,324 126,324 182,324 238,324 294,324 350,324 406,324 462,324 518,324 574,324 630,324 686,324 742,324"/>
 <circle cx="70" cy="324" r="3" fill="#17becf"/>
 <circle cx="126" cy="324" r="3" fill="#17becf"/>
@@ -107,7 +107,7 @@
 <circle cx="630" cy="324" r="3" fill="#17becf"/>
 <circle cx="686" cy="324" r="3" fill="#17becf"/>
 <circle cx="742" cy="324" r="3" fill="#17becf"/>
-<text x="764" y="150" font-size="11" fill="#17becf">Init.List.reverse_reverse</text>
+<text x="764" y="150" font-size="11" fill="#17becf">List.reverse_reverse</text>
 <polyline fill="none" stroke="#8c564b" stroke-width="2" points="70,357 126,357 182,357 238,357 294,357 350,357 406,357 462,357 518,357 574,357 630,357 686,357 742,357"/>
 <circle cx="70" cy="357" r="3" fill="#8c564b"/>
 <circle cx="126" cy="357" r="3" fill="#8c564b"/>
@@ -122,7 +122,7 @@
 <circle cx="630" cy="357" r="3" fill="#8c564b"/>
 <circle cx="686" cy="357" r="3" fill="#8c564b"/>
 <circle cx="742" cy="357" r="3" fill="#8c564b"/>
-<text x="764" y="168" font-size="11" fill="#8c564b">Init.Array.size_push</text>
+<text x="764" y="168" font-size="11" fill="#8c564b">Array.size_push</text>
 <polyline fill="none" stroke="#e377c2" stroke-width="2" points="70,375 126,375 182,375 238,375 294,375 350,375 406,375 462,375 518,375 574,375 630,375 686,375 742,375"/>
 <circle cx="70" cy="375" r="3" fill="#e377c2"/>
 <circle cx="126" cy="375" r="3" fill="#e377c2"/>
@@ -137,7 +137,7 @@
 <circle cx="630" cy="375" r="3" fill="#e377c2"/>
 <circle cx="686" cy="375" r="3" fill="#e377c2"/>
 <circle cx="742" cy="375" r="3" fill="#e377c2"/>
-<text x="764" y="186" font-size="11" fill="#e377c2">Init.Nat.strongRecOn</text>
+<text x="764" y="186" font-size="11" fill="#e377c2">Nat.strongRecOn</text>
 <polyline fill="none" stroke="#7f7f7f" stroke-width="2" points="70,403 126,403 182,403 238,403 294,403 350,403 406,403 462,403 518,403 574,403 630,403 686,403 742,403"/>
 <circle cx="70" cy="403" r="3" fill="#7f7f7f"/>
 <circle cx="126" cy="403" r="3" fill="#7f7f7f"/>
@@ -152,7 +152,7 @@
 <circle cx="630" cy="403" r="3" fill="#7f7f7f"/>
 <circle cx="686" cy="403" r="3" fill="#7f7f7f"/>
 <circle cx="742" cy="403" r="3" fill="#7f7f7f"/>
-<text x="764" y="204" font-size="11" fill="#7f7f7f">Fixtures.Fixtures.addComm</text>
+<text x="764" y="204" font-size="11" fill="#7f7f7f">Fixtures.addComm</text>
 <polyline fill="none" stroke="#bcbd22" stroke-width="2" points="70,249 126,249 182,249 238,249 294,249 350,249 406,249 462,249 518,249 574,249 630,249 686,249 742,249"/>
 <circle cx="70" cy="249" r="3" fill="#bcbd22"/>
 <circle cx="126" cy="249" r="3" fill="#bcbd22"/>
@@ -167,7 +167,7 @@
 <circle cx="630" cy="249" r="3" fill="#bcbd22"/>
 <circle cx="686" cy="249" r="3" fill="#bcbd22"/>
 <circle cx="742" cy="249" r="3" fill="#bcbd22"/>
-<text x="764" y="222" font-size="11" fill="#bcbd22">Fixtures.Fixtures.branchy</text>
+<text x="764" y="222" font-size="11" fill="#bcbd22">Fixtures.branchy</text>
 <polyline fill="none" stroke="#1f77b4" stroke-width="2" points="70,318 126,318 182,318 238,318 294,318 350,318 406,318 462,318 518,318 574,318 630,318 686,318 742,318"/>
 <circle cx="70" cy="318" r="3" fill="#1f77b4"/>
 <circle cx="126" cy="318" r="3" fill="#1f77b4"/>
@@ -182,7 +182,7 @@
 <circle cx="630" cy="318" r="3" fill="#1f77b4"/>
 <circle cx="686" cy="318" r="3" fill="#1f77b4"/>
 <circle cx="742" cy="318" r="3" fill="#1f77b4"/>
-<text x="764" y="240" font-size="11" fill="#1f77b4">Fixtures.Fixtures.decBig</text>
+<text x="764" y="240" font-size="11" fill="#1f77b4">Fixtures.decBig</text>
 <polyline fill="none" stroke="#d62728" stroke-width="2" points="70,344 126,344 182,344 238,344 294,344 350,344 406,344 462,344 518,344 574,344 630,344 686,344 742,344"/>
 <circle cx="70" cy="344" r="3" fill="#d62728"/>
 <circle cx="126" cy="344" r="3" fill="#d62728"/>
@@ -197,5 +197,5 @@
 <circle cx="630" cy="344" r="3" fill="#d62728"/>
 <circle cx="686" cy="344" r="3" fill="#d62728"/>
 <circle cx="742" cy="344" r="3" fill="#d62728"/>
-<text x="764" y="258" font-size="11" fill="#d62728">Fixtures.Fixtures.natively</text>
+<text x="764" y="258" font-size="11" fill="#d62728">Fixtures.natively</text>
 </svg>

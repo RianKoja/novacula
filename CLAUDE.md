@@ -34,10 +34,18 @@ Under the hood:
     lake build Fixtures                     # toy fixtures in test/
     lake exe novacula selftest                # toy checks, must stay green
     lake exe novacula score <Module> <Decl>   # JSON report for one declaration
+    lake exe novacula badge <csv> <svg>       # badge from a history file
 
-External checkers are invoked only when their executables are configured:
-`LEAN4CHECKER=/path/to/exe NANODA=/path/to/exe lake exe novacula score ...`. Unconfigured
-checkers are reported as `not-configured` and `gate.ok` stays false.
+External checkers are invoked only when configured: `LEAN4CHECKER=leanchecker` (ships with the
+toolchain) and `NANODA=scripts/nanoda-check` (needs `LEAN4EXPORT` and `NANODA_BIN`). Unconfigured
+checkers are reported as `not-configured`, `gate.ok` stays false, and no cost is reported.
+
+Cost parameters come from `NOVACULA_CORPUS` (e.g. `Mathlib`), `NOVACULA_FAME_PIVOT` and
+`NOVACULA_FAME_EXP` until profiles exist. The raw-metric cache lives in `.lake/novacula-cache`
+(`NOVACULA_CACHE`); bump `metricsVersion` in `Novacula/Graph.lean` whenever `termMetrics` changes.
+
+To score another project, rebuild Novacula with its `lean-toolchain` and run the binary under its
+`lake env`. `action.yml` does exactly this in CI.
 
 ## History tracking
 
@@ -46,8 +54,9 @@ the date and Novacula revision passed in by the Makefile. The tool never reads a
 old revision reproduces its old rows. Reruns on the same date and revision are no-ops.
 `make track` then redraws `docs/history.svg`, the chart shown in README.md: one line per tracked
 declaration, one shaded vertical band per Lean version, integer coordinates so the same history
-renders identical bytes. The daily Kestra flow `kbm.novacula/novacula-daily` runs this on the
-latest stable Lean and pushes the result.
+renders identical bytes. `Module *` in `targets.txt` tracks every theorem under `Module`.
+The daily Kestra flow `kbm.novacula/novacula-daily` runs this on the latest stable Lean and
+pushes the result.
 
 ## Two clones push to main
 
