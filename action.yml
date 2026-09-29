@@ -151,25 +151,41 @@ runs:
         fi
         hist="$RUNNER_TEMP/novacula-history"
         nov="$RUNNER_TEMP/novacula/.lake/build/bin/novacula"
-        rm -rf "$hist"
-        if git fetch -q origin "$BRANCH" 2>/dev/null; then
-          git worktree add -q "$hist" FETCH_HEAD
-        else
-          git worktree add -q --detach "$hist"
-          git -C "$hist" checkout -q --orphan "$BRANCH"
-          git -C "$hist" rm -rfq .
-        fi
-        cd "$hist"
-        [ -s history.csv ] || "$nov" csv-header > history.csv
-        # One run per day: a later run replaces the day's rows.
-        today=$(cut -d, -f1 "$RUNNER_TEMP/novacula-rows.csv" | head -n 1)
-        grep -v "^$today," history.csv > history.tmp || true
-        cat "$RUNNER_TEMP/novacula-rows.csv" >> history.tmp
-        mv history.tmp history.csv
-        "$nov" chart history.csv history.svg cost
-        "$nov" badge history.csv badge.svg
+        rows="$RUNNER_TEMP/novacula-rows.csv"
+        today=$(cut -d, -f1 "$rows" | head -n 1)
+        # Rebuild the history from the branch tip. Called again after a rejected push, so a
+        # concurrent run's rows are kept and only this day's rows are replaced.
+        update() {
+          git worktree remove --force "$hist" 2>/dev/null || rm -rf "$hist"
+          git worktree prune
+          git branch -q -D novacula-orphan 2>/dev/null || true
+          if git fetch -q origin "$BRANCH" 2>/dev/null; then
+            git worktree add -q --detach "$hist" FETCH_HEAD
+          else
+            git worktree add -q --detach "$hist"
+            git -C "$hist" checkout -q --orphan novacula-orphan
+            git -C "$hist" rm -rfq --ignore-unmatch .
+          fi
+          cd "$hist"
+          [ -s history.csv ] || "$nov" csv-header > history.csv
+          # One run per day: a later run replaces the day's rows.
+          grep -v "^$today," history.csv > history.tmp || true
+          cat "$rows" >> history.tmp
+          mv history.tmp history.csv
+          "$nov" chart history.csv history.svg cost
+          "$nov" badge history.csv badge.svg
+          git add history.csv history.svg badge.svg
+          git diff --cached --quiet || git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "novacula: $today on Lean ${{ steps.score.outputs.lean }} for ${GITHUB_SHA::7}"
+          cd "$GITHUB_WORKSPACE"
+        }
+        update
         if [ "$PUSH" != true ]; then echo "not pushing ($GITHUB_EVENT_NAME on $GITHUB_REF_NAME)"; exit 0; fi
-        git add history.csv history.svg badge.svg
-        git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-          commit -q -m "novacula: $today on Lean ${{ steps.score.outputs.lean }} for ${GITHUB_SHA::7}" || exit 0
-        git push -q origin "HEAD:refs/heads/$BRANCH"
+        for attempt in 1 2 3 4 5; do
+          if git -C "$hist" push -q origin "HEAD:refs/heads/$BRANCH"; then exit 0; fi
+          echo "push rejected (attempt $attempt), refetching $BRANCH and retrying"
+          sleep $((attempt * 5))
+          update
+        done
+        echo "::error::could not push to $BRANCH after 5 attempts"
+        exit 1
