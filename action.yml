@@ -43,7 +43,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: leanprover/lean-action@v1
+    - uses: leanprover/lean-action@50fcf42d2e460296f1a34b402e990d1b24f8b596 # v1.6.0
       with:
         build: true
         test: false
@@ -73,7 +73,7 @@ runs:
 
     # Only the binary is cached, in its own directory: restoring into the source checkout would
     # leave a directory without `.git` that the next clone refuses.
-    - uses: actions/cache@v4
+    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       id: nanoda-cache
       with:
         path: ${{ runner.temp }}/nanoda-bin
@@ -92,7 +92,7 @@ runs:
 
     # Raw metrics depend only on the Lean version and each module's olean, so they are reused
     # across runs; costs are always recomputed from them.
-    - uses: actions/cache@v4
+    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: .lake/novacula-cache
         key: novacula-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}

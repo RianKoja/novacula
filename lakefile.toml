@@ -1,5 +1,5 @@
 name = "novacula"
-version = "0.2.0"
+version = "0.2.1"
 defaultTargets = ["novacula"]
 
 [[lean_lib]]
@@ -11,6 +11,6 @@ srcDir = "test"
 
 [[lean_exe]]
 name = "novacula"
-version = "0.2.0"
+version = "0.2.1"
 root = "Main"
 supportInterpreter = true
