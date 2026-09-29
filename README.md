@@ -61,15 +61,18 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - uses: RianKoja/novacula@main
+      - uses: RianKoja/novacula@v0.2.0
         with:
           theorems: all   # or title theorems: "Foo.main_theorem Foo.corollary"
 ```
 
+Pin the action to a commit SHA (`RianKoja/novacula@<sha> # v0.2.0`) if the repository requires it;
+Renovate and Dependabot update such pins when a new tag is released.
+
 The action builds the project, rebuilds Novacula and the checkers on the project's own toolchain,
 and scores the selected theorems. Each run writes a table to the job summary. Runs on the default
-branch, scheduled runs and manual runs also update `history.csv`, `history.svg` and `badge.svg` on
-a `novacula` branch, which the README can show:
+branch (pushes, scheduled runs and manual runs) also update `history.csv`, `history.svg` and
+`badge.svg` on a `novacula` branch, which the README can show:
 
 ```markdown
 ![Novacula](https://raw.githubusercontent.com/OWNER/REPO/novacula/badge.svg)

@@ -25,8 +25,8 @@ inputs:
     default: novacula
   push:
     description: >-
-      `auto` pushes the history only for pushes to the default branch, scheduled runs and manual
-      runs. `true` or `false` force it.
+      `auto` pushes the history only for pushes, scheduled runs and manual runs on the default
+      branch. `true` or `false` force it.
     default: auto
   nanoda-rev:
     description: nanoda_lib commit used for the second kernel check.
@@ -120,7 +120,10 @@ runs:
         export NOVACULA_CORPUS="$CORPUS" LEAN4CHECKER=leanchecker NANODA="$nov/scripts/nanoda-check"
         export LEAN4EXPORT="$RUNNER_TEMP/lean4export/.lake/build/bin/lean4export"
         export NANODA_BIN="$RUNNER_TEMP/nanoda-bin/nanoda_bin"
-        rev=$(git -C "$GITHUB_ACTION_PATH" rev-parse --short HEAD 2>/dev/null || echo "${GITHUB_ACTION_REF:-unknown}")
+        # Actions are downloaded without .git, so the revision is the ref the workflow pinned:
+        # a tag, a branch, or a commit SHA (shortened like `git rev-parse --short`).
+        rev=${GITHUB_ACTION_REF:-unknown}
+        [[ $rev =~ ^[0-9a-f]{40}$ ]] && rev=${rev::7}
         # The tool never reads a clock: the date is passed in.
         lake env "$nov/.lake/build/bin/novacula" csv "$(date -u +%F)" "$rev" "$targets" > "$RUNNER_TEMP/novacula-rows.csv"
         lean=$(tail -n 1 "$RUNNER_TEMP/novacula-rows.csv" | cut -d, -f12)
@@ -149,11 +152,13 @@ runs:
         PUSH: ${{ inputs.push }}
         DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       run: |
+        # Only the default branch publishes, so a manual run on a feature branch cannot put its
+        # scores in the history, and every publishing run shares one concurrency group per ref.
         if [ "$PUSH" = auto ]; then
           PUSH=false
           case "$GITHUB_EVENT_NAME" in
-            schedule|workflow_dispatch) PUSH=true ;;
-            push) [ "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH" ] && PUSH=true ;;
+            push|schedule|workflow_dispatch)
+              [ "$GITHUB_REF" = "refs/heads/$DEFAULT_BRANCH" ] && PUSH=true ;;
           esac
         fi
         hist="$RUNNER_TEMP/novacula-history"

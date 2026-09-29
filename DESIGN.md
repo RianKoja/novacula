@@ -221,12 +221,12 @@ Decision: projects adopt Novacula with one job in their CI:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - uses: RianKoja/novacula@main
+      - uses: RianKoja/novacula@v0.2.0
         with:
           theorems: all        # or a list of title theorems
 ```
 
-plus a `schedule` trigger for periodic reruns. The action builds the project, rebuilds Novacula, lean4export and nanoda on the project's toolchain (section 8), runs the gate, and scores the selected theorems with the Mathlib corpus when the project uses Mathlib. It writes a table to the job summary. On pushes to the default branch, scheduled runs and manual runs, it also appends the rows to `history.csv` on a separate `novacula` branch, replacing any earlier rows of the same day, and redraws `history.svg` and `badge.svg` there. A rejected push (another run updated the branch first) is retried up to five times, each time rebuilding the history from the new branch tip, so concurrent runs cannot drop each other's rows. Reason: the README can show the badge and chart from raw URLs without every run adding a commit to `main`. The badge shows the cost of the whole selection and the Lean version.
+plus a `schedule` trigger for periodic reruns. The action builds the project, rebuilds Novacula, lean4export and nanoda on the project's toolchain (section 8), runs the gate, and scores the selected theorems with the Mathlib corpus when the project uses Mathlib. It writes a table to the job summary. On pushes, scheduled runs and manual runs on the default branch, it also appends the rows to `history.csv` on a separate `novacula` branch, replacing any earlier rows of the same day, and redraws `history.svg` and `badge.svg` there. A rejected push (another run updated the branch first) is retried up to five times, each time rebuilding the history from the new branch tip, so concurrent runs cannot drop each other's rows. Reason: the README can show the badge and chart from raw URLs without every run adding a commit to `main`. The badge shows the cost of the whole selection and the Lean version.
 
 ## 12. Open questions
 
