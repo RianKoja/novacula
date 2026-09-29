@@ -71,17 +71,24 @@ runs:
         cp lean-toolchain "$RUNNER_TEMP/lean4export/"
         (cd "$RUNNER_TEMP/lean4export" && lake build)
 
+    # Only the binary is cached, in its own directory: restoring into the source checkout would
+    # leave a directory without `.git` that the next clone refuses.
     - uses: actions/cache@v4
+      id: nanoda-cache
       with:
-        path: ${{ runner.temp }}/nanoda_lib/target
-        key: nanoda-${{ inputs.nanoda-rev }}
+        path: ${{ runner.temp }}/nanoda-bin
+        key: nanoda-bin-${{ runner.os }}-${{ inputs.nanoda-rev }}
 
     - name: Build nanoda
+      if: steps.nanoda-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        [ -d "$RUNNER_TEMP/nanoda_lib/.git" ] || git clone -q https://github.com/ammkrn/nanoda_lib "$RUNNER_TEMP/nanoda_lib"
+        rm -rf "$RUNNER_TEMP/nanoda_lib"
+        git clone -q https://github.com/ammkrn/nanoda_lib "$RUNNER_TEMP/nanoda_lib"
         git -C "$RUNNER_TEMP/nanoda_lib" checkout -q "${{ inputs.nanoda-rev }}"
         cargo build -q --release --manifest-path "$RUNNER_TEMP/nanoda_lib/Cargo.toml"
+        mkdir -p "$RUNNER_TEMP/nanoda-bin"
+        cp "$RUNNER_TEMP/nanoda_lib/target/release/nanoda_bin" "$RUNNER_TEMP/nanoda-bin/"
 
     # Raw metrics depend only on the Lean version and each module's olean, so they are reused
     # across runs; costs are always recomputed from them.
@@ -112,7 +119,7 @@ runs:
         nov="$RUNNER_TEMP/novacula"
         export NOVACULA_CORPUS="$CORPUS" LEAN4CHECKER=leanchecker NANODA="$nov/scripts/nanoda-check"
         export LEAN4EXPORT="$RUNNER_TEMP/lean4export/.lake/build/bin/lean4export"
-        export NANODA_BIN="$RUNNER_TEMP/nanoda_lib/target/release/nanoda_bin"
+        export NANODA_BIN="$RUNNER_TEMP/nanoda-bin/nanoda_bin"
         rev=$(git -C "$GITHUB_ACTION_PATH" rev-parse --short HEAD 2>/dev/null || echo "${GITHUB_ACTION_REF:-unknown}")
         # The tool never reads a clock: the date is passed in.
         lake env "$nov/.lake/build/bin/novacula" csv "$(date -u +%F)" "$rev" "$targets" > "$RUNNER_TEMP/novacula-rows.csv"
