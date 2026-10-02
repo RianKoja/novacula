@@ -120,10 +120,9 @@ runs:
         export NOVACULA_CORPUS="$CORPUS" LEAN4CHECKER=leanchecker NANODA="$nov/scripts/nanoda-check"
         export LEAN4EXPORT="$RUNNER_TEMP/lean4export/.lake/build/bin/lean4export"
         export NANODA_BIN="$RUNNER_TEMP/nanoda-bin/nanoda_bin"
-        # Actions are downloaded without .git, so the revision is the ref the workflow pinned:
-        # a tag, a branch, or a commit SHA (shortened like `git rev-parse --short`).
-        rev=${GITHUB_ACTION_REF:-unknown}
-        [[ $rev =~ ^[0-9a-f]{40}$ ]] && rev=${rev::7}
+        # The release version in lakefile.toml, so a workflow pinned to a commit SHA still records
+        # which release it ran.
+        rev=v$(sed -n 's/^version = "\(.*\)"/\1/p' "$GITHUB_ACTION_PATH/lakefile.toml")
         # The tool never reads a clock: the date is passed in.
         lake env "$nov/.lake/build/bin/novacula" csv "$(date -u +%F)" "$rev" "$targets" > "$RUNNER_TEMP/novacula-rows.csv"
         lean=$(tail -n 1 "$RUNNER_TEMP/novacula-rows.csv" | cut -d, -f12)

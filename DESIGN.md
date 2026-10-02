@@ -160,7 +160,7 @@ A profile is a JSON file (parsed with `Lean.Json`) containing metric weights, fa
 
 - Development targets the latest stable Lean release, currently v4.34.1. The pin lives in `lean-toolchain`.
 - One run of Novacula uses one Lean version.
-- An olean can only be read by the Lean version that wrote it. Decision: to score another project, Novacula is rebuilt on that project's own toolchain and runs inside its `lake env`. The Lean version is recorded in every row, shown on the badge, and marked as a band on the chart, since scores are comparable only within one version.
+- An olean can only be read by the Lean version that wrote it. Decision: to score another project, Novacula is rebuilt on that project's own toolchain and runs inside its `lake env`. The Lean version is recorded in every row, shown on the badge, and marked as a band on the chart, since scores are comparable only within one version. The Novacula version is recorded, shown and marked the same way (section 11d), for the same reason.
 - A dependency that does not build on the chosen toolchain cannot be scored. This is reported, not worked around.
 - Novacula supports a window of Lean versions (builds and passes the selftest on 4.33.1, 4.34.0-rc2 and 4.34.1). Version-specific API use lives in `Novacula/Compat.lean`.
 
@@ -208,12 +208,13 @@ A single Lake package, `Novacula`:
 
 ## 11b. History tracking
 
-`targets.txt` lists tracked declarations, remarkable results first. A line `Module Decl` tracks one declaration; `Module *` tracks every user-written theorem of `Module` and its submodules. `make track` appends their raw metrics and cost to `data/history.csv` with the date and Novacula revision. Rows carry the Lean version because scores are comparable only within one version (principle 3). A row has an empty cost when the gate rejected it. `docs/history.svg` draws one line per declaration and one shaded band per Lean version, on a log scale once values span more than two decades. All coordinates are integers, so the same history renders identical bytes.
+`targets.txt` lists tracked declarations, remarkable results first. A line `Module Decl` tracks one declaration; `Module *` tracks every user-written theorem of `Module` and its submodules. `make track` appends their raw metrics and cost to `data/history.csv` with the date and Novacula version. Rows carry the Lean version because scores are comparable only within one version (principle 3). A row has an empty cost when the gate rejected it. `docs/history.svg` draws one line per declaration, one shaded band per Lean version and a dashed marker where the Novacula version changes, on a log scale once values span more than two decades. All coordinates are integers, so the same history renders identical bytes.
 
 ## 11c. GitHub Action
 
 Decision: projects adopt Novacula with one job in their CI:
 
+<!-- x-release-please-start-version -->
 ```yaml
   novacula:
     runs-on: ubuntu-latest
@@ -225,8 +226,13 @@ Decision: projects adopt Novacula with one job in their CI:
         with:
           theorems: all        # or a list of title theorems
 ```
+<!-- x-release-please-end -->
 
-plus a `schedule` trigger for periodic reruns. The action builds the project, rebuilds Novacula, lean4export and nanoda on the project's toolchain (section 8), runs the gate, and scores the selected theorems with the Mathlib corpus when the project uses Mathlib. It writes a table to the job summary. On pushes, scheduled runs and manual runs on the default branch, it also appends the rows to `history.csv` on a separate `novacula` branch, replacing any earlier rows of the same day, and redraws `history.svg` and `badge.svg` there. A rejected push (another run updated the branch first) is retried up to five times, each time rebuilding the history from the new branch tip, so concurrent runs cannot drop each other's rows. Reason: the README can show the badge and chart from raw URLs without every run adding a commit to `main`. The badge shows the cost of the whole selection and the Lean version.
+plus a `schedule` trigger for periodic reruns. The action builds the project, rebuilds Novacula, lean4export and nanoda on the project's toolchain (section 8), runs the gate, and scores the selected theorems with the Mathlib corpus when the project uses Mathlib. It writes a table to the job summary. On pushes, scheduled runs and manual runs on the default branch, it also appends the rows to `history.csv` on a separate `novacula` branch, replacing any earlier rows of the same day, and redraws `history.svg` and `badge.svg` there. A rejected push (another run updated the branch first) is retried up to five times, each time rebuilding the history from the new branch tip, so concurrent runs cannot drop each other's rows. Reason: the README can show the badge and chart from raw URLs without every run adding a commit to `main`. The badge shows the cost of the whole selection, the Novacula version and the Lean version.
+
+## 11d. Versioning
+
+Decision: Novacula has semantic versions, cut automatically by release-please from Conventional Commit messages on `main`. The version lives in `lakefile.toml`; release-please bumps it there and in the usage snippets of README.md and this file, writes `CHANGELOG.md`, and tags `vX.Y.Z` when its release PR is merged. Breaking changes bump the minor version while below 1.0. The `novaculaRev` column of every history row holds this version (`v0.2.1`), read from `lakefile.toml`, both in `make track` and in the action. Reason: scores are comparable only within one Novacula version, as within one Lean version, so the badge and chart must show it; a commit SHA in the column would change on every commit and say nothing about compatibility, and a workflow that pins the action by SHA would otherwise record only the SHA. Rows written before this decision carry a commit SHA.
 
 ## 12. Open questions
 

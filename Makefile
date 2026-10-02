@@ -3,7 +3,8 @@ CHART   ?= docs/history.svg
 METRIC  ?= size
 TARGETS ?= targets.txt
 DATE    ?= $(shell date -I)
-REV     ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo nogit)
+# The release version in lakefile.toml, which release-please bumps on every release.
+REV     ?= v$(shell sed -n 's/^version = "\(.*\)"/\1/p' lakefile.toml)
 
 .PHONY: help build fixtures test score track chart history clean
 

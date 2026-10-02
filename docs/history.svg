@@ -6,6 +6,40 @@
 <rect x="427" y="46" width="323" height="410" fill="#f8fafc"/>
 <line x1="427" y1="46" x2="427" y2="456" stroke="#c7d2de" stroke-width="1"/>
 <text x="588" y="34" font-size="12" fill="#44546a" text-anchor="middle">Lean 4.34.1</text>
+<line x1="70" y1="46" x2="70" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="74" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula ad8bbd4</text>
+<line x1="91" y1="46" x2="91" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="95" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 8f503d4</text>
+<line x1="133" y1="46" x2="133" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="137" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula ee29def</text>
+<line x1="175" y1="46" x2="175" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="179" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 0f71809</text>
+<line x1="217" y1="46" x2="217" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="221" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula a3a52f0</text>
+<line x1="259" y1="46" x2="259" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="263" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 5c4d0ba</text>
+<line x1="301" y1="46" x2="301" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="305" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 98b5a26</text>
+<line x1="343" y1="46" x2="343" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="347" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula cdbf6d3</text>
+<line x1="385" y1="46" x2="385" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="389" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula b20f580</text>
+<line x1="427" y1="46" x2="427" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="431" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula a061b18</text>
+<line x1="469" y1="46" x2="469" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="473" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 210c894</text>
+<line x1="511" y1="46" x2="511" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="515" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 3a94c34</text>
+<line x1="553" y1="46" x2="553" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="557" y="60" font-size="10" fill="#8a6d3b" text-anchor="start">novacula 37ffc70</text>
+<line x1="595" y1="46" x2="595" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="591" y="60" font-size="10" fill="#8a6d3b" text-anchor="end">novacula 962be39</text>
+<line x1="637" y1="46" x2="637" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="633" y="60" font-size="10" fill="#8a6d3b" text-anchor="end">novacula 0a03605</text>
+<line x1="679" y1="46" x2="679" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="675" y="60" font-size="10" fill="#8a6d3b" text-anchor="end">novacula b6a4f5f</text>
+<line x1="721" y1="46" x2="721" y2="456" stroke="#8a6d3b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="717" y="60" font-size="10" fill="#8a6d3b" text-anchor="end">novacula 8eedd33</text>
 <line x1="70" y1="456" x2="750" y2="456" stroke="#333" stroke-width="1"/>
 <line x1="70" y1="46" x2="70" y2="456" stroke="#333" stroke-width="1"/>
 <text x="60" y="50" font-size="11" fill="#333" text-anchor="end">207</text>

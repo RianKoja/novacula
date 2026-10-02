@@ -1,8 +1,8 @@
 import Novacula.Term
 
 /-! SVG chart of `data/history.csv`. Each tracked declaration is one line; each Lean version
-is a shaded vertical band, so a jump caused by a toolchain update is visibly attributable to
-the update rather than to the proofs. All coordinates are integers: no float formatting, so
+is a shaded vertical band and each Novacula version starts at a dashed marker, so a jump caused
+by a toolchain or tool update is visibly attributable to the update rather than to the proofs. All coordinates are integers: no float formatting, so
 the same history always renders the same bytes. -/
 
 namespace Novacula
@@ -11,6 +11,8 @@ open Lean
 structure Row where
   date : String
   leanVersion : String
+  /-- Novacula version (or commit, in older rows) that wrote the row. -/
+  rev : String
   series : String
   /-- Legend text: the declaration, or "all selected" for a `*` set row. -/
   label : String
@@ -30,6 +32,7 @@ def readHistory (path : System.FilePath) (metric : String) : IO (Array Row) := d
       | throw (IO.userError s!"history file has no column {name}")
     return i
   let (di, li, mi, ci, vi) := (← idx "date", ← idx "leanVersion", ← idx "module", ← idx "decl", ← idx metric)
+  let ri ← idx "novaculaRev"
   let mut rows := #[]
   for line in lines[1:] do
     if line.trimAscii.isEmpty then continue
@@ -42,7 +45,7 @@ def readHistory (path : System.FilePath) (metric : String) : IO (Array Row) := d
     if raw.isEmpty then continue
     let some value := raw.toNat? | throw (IO.userError s!"metric {metric} is not a number in: {line}")
     let decl ← get ci
-    rows := rows.push { date := ← get di, leanVersion := ← get li
+    rows := rows.push { date := ← get di, leanVersion := ← get li, rev := ← get ri
                         series := s!"{← get mi}.{decl}"
                         label := if decl == "*" then "all selected" else decl, value }
   return rows
@@ -54,7 +57,8 @@ private def palette : Array String :=
 private def esc (s : String) : String :=
   s.replace "&" "&amp;" |>.replace "<" "&lt;" |>.replace ">" "&gt;"
 
-/-- Render the history as an SVG. Bands mark the Lean version in use on each date. -/
+/-- Render the history as an SVG. Bands mark the Lean version in use on each date, dashed
+markers the first date of each Novacula version. -/
 def renderChart (rows : Array Row) (metric : String) : String := Id.run do
   let dates := rows.toList.map (·.date) |>.eraseDups |>.mergeSort (· < ·) |>.toArray
   let series := rows.toList.map (·.series) |>.eraseDups |>.toArray
@@ -67,6 +71,7 @@ def renderChart (rows : Array Row) (metric : String) : String := Id.run do
   -- Same date always has one Lean version: the last row wins, matching the order of the file.
   let versionAt := fun (d : String) =>
     (rows.filter (·.date == d)).back?.map (·.leanVersion) |>.getD "?"
+  let revAt := fun (d : String) => (rows.filter (·.date == d)).back?.map (·.rev) |>.getD "?"
   let (w, left, right, top, bot) := (1060, 70, 310, 46, 64)
   let h := max 520 (top + 24 + series.size * 18 + bot)
   let plotW := w - left - right
@@ -96,6 +101,16 @@ def renderChart (rows : Array Row) (metric : String) : String := Id.run do
     out := out.push s!"<rect x=\"{x0}\" y=\"{top}\" width=\"{x1 - x0}\" height=\"{plotH}\" fill=\"{fill}\"/>"
     out := out.push s!"<line x1=\"{x0}\" y1=\"{top}\" x2=\"{x0}\" y2=\"{top + plotH}\" stroke=\"#c7d2de\" stroke-width=\"1\"/>"
     out := out.push s!"<text x=\"{(x0 + x1) / 2}\" y=\"{top - 12}\" font-size=\"12\" fill=\"#44546a\" text-anchor=\"middle\">Lean {esc v}</text>"
+  -- Novacula version markers: a dashed line where the version changes, labeled inside the plot.
+  for i in [0:n] do
+    let r := revAt dates[i]!
+    if i == 0 || revAt dates[i - 1]! != r then
+      -- Same position as a Lean band edge: halfway from the previous date.
+      let x := if i == 0 then left else (xOf i + xOf (i - 1)) / 2
+      -- Labels in the right quarter grow leftward so they stay clear of the legend.
+      let (tx, anchor) := if 4 * (x - left) > 3 * plotW then (x - 4, "end") else (x + 4, "start")
+      out := out.push s!"<line x1=\"{x}\" y1=\"{top}\" x2=\"{x}\" y2=\"{top + plotH}\" stroke=\"#8a6d3b\" stroke-width=\"1\" stroke-dasharray=\"4 3\"/>"
+      out := out.push s!"<text x=\"{tx}\" y=\"{top + 14}\" font-size=\"10\" fill=\"#8a6d3b\" text-anchor=\"{anchor}\">novacula {esc r}</text>"
   -- Axes.
   out := out.push s!"<line x1=\"{left}\" y1=\"{top + plotH}\" x2=\"{left + plotW}\" y2=\"{top + plotH}\" stroke=\"#333\" stroke-width=\"1\"/>"
   out := out.push s!"<line x1=\"{left}\" y1=\"{top}\" x2=\"{left}\" y2=\"{top + plotH}\" stroke=\"#333\" stroke-width=\"1\"/>"
@@ -144,7 +159,8 @@ def renderBadge (label value : String) : String :=
     s!"<text x=\"{lw + vw / 2}\" y=\"14\">{esc value}</text>",
     "</g>", "</svg>", ""]
 
-/-- Badge with the latest cost and the Lean version it was computed on. The value is the `*` set
+/-- Badge with the latest cost, the Novacula version that computed it and the Lean version it ran
+on. The value is the `*` set
 row of the latest date (all tracked declarations scored together), or the only row if a single
 declaration is tracked. -/
 def badgeCmd (csv svg : System.FilePath) : IO UInt32 := do
@@ -154,8 +170,8 @@ def badgeCmd (csv svg : System.FilePath) : IO UInt32 := do
   let sets := latest.filter (·.series.endsWith ".*")
   let picked := if sets.isEmpty then latest else sets
   let total := picked.foldl (· + ·.value) 0
-  IO.FS.writeFile svg (renderBadge "novacula" s!"{total} · Lean {last.leanVersion}")
-  IO.println s!"wrote {svg}: {total} on Lean {last.leanVersion}"
+  IO.FS.writeFile svg (renderBadge s!"novacula {last.rev}" s!"{total} · Lean {last.leanVersion}")
+  IO.println s!"wrote {svg}: {total} by novacula {last.rev} on Lean {last.leanVersion}"
   return 0
 
 end Novacula

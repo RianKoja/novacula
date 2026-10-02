@@ -40,8 +40,9 @@ behind each rule, and the open questions.
 ## Metric history
 
 The declarations in `targets.txt` are scored daily and appended to `data/history.csv`. Each shaded
-band is one Lean version: a step at a band edge comes from the toolchain, while movement inside a
-band comes from the proofs or from changes in the fame of what they cite.
+band is one Lean version and each dashed marker starts a Novacula version: a step at a band edge
+or marker comes from the toolchain or the tool, while movement between them comes from the proofs
+or from changes in the fame of what they cite.
 
 ![Metric history](docs/history.svg)
 
@@ -49,6 +50,7 @@ band comes from the proofs or from changes in the fame of what they cite.
 
 Add a job to the project's CI, plus a schedule for periodic reruns:
 
+<!-- x-release-please-start-version -->
 ```yaml
 on:
   schedule:
@@ -69,6 +71,7 @@ jobs:
 Pin the action to a commit SHA (`RianKoja/novacula@<sha> # v0.2.1`) if the repository requires it;
 Renovate and Dependabot update such pins when a new tag is released. The action pins the
 actions it uses itself to commit SHAs as well.
+<!-- x-release-please-end -->
 
 The action builds the project, rebuilds Novacula and the checkers on the project's own toolchain,
 and scores the selected theorems. Each run writes a table to the job summary. Runs on the default
@@ -80,8 +83,8 @@ branch (pushes, scheduled runs and manual runs) also update `history.csv`, `hist
 ![Novacula history](https://raw.githubusercontent.com/OWNER/REPO/novacula/history.svg)
 ```
 
-The badge shows the cost of all selected theorems scored together and the Lean version it was
-computed on. Other inputs: `module`, `corpus`, `branch`, `push`, `nanoda-rev` (see `action.yml`).
+The badge shows the cost of all selected theorems scored together, the Novacula version that
+computed it, and the Lean version it ran on. Other inputs: `module`, `corpus`, `branch`, `push`, `nanoda-rev` (see `action.yml`).
 
 ## Local use
 
