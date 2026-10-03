@@ -1,3 +1,5 @@
+<img src="docs/logo.svg" alt="Novacula logo" width="128" align="right">
+
 # Novacula
 
 A deterministic complexity metric for Lean 4 proofs. Lower is better: a large gap between two
