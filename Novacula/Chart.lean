@@ -1,7 +1,7 @@
 import Novacula.Term
 
 /-! SVG chart of `data/history.csv`. Each tracked declaration is one line; each Lean version
-is a shaded vertical band and each Novacula version starts at a dashed marker, so a jump caused
+is a shaded vertical band and each Novacula minor version starts at a dashed marker, so a jump caused
 by a toolchain or tool update is visibly attributable to the update rather than to the proofs. All coordinates are integers: no float formatting, so
 the same history always renders the same bytes. -/
 
@@ -58,7 +58,7 @@ private def esc (s : String) : String :=
   s.replace "&" "&amp;" |>.replace "<" "&lt;" |>.replace ">" "&gt;"
 
 /-- Render the history as an SVG. Bands mark the Lean version in use on each date, dashed
-markers the first date of each Novacula version. -/
+markers the first date of each Novacula minor version. -/
 def renderChart (rows : Array Row) (metric : String) : String := Id.run do
   let dates := rows.toList.map (·.date) |>.eraseDups |>.mergeSort (· < ·) |>.toArray
   let series := rows.toList.map (·.series) |>.eraseDups |>.toArray
@@ -71,7 +71,13 @@ def renderChart (rows : Array Row) (metric : String) : String := Id.run do
   -- Same date always has one Lean version: the last row wins, matching the order of the file.
   let versionAt := fun (d : String) =>
     (rows.filter (·.date == d)).back?.map (·.leanVersion) |>.getD "?"
-  let revAt := fun (d : String) => (rows.filter (·.date == d)).back?.map (·.rev) |>.getD "?"
+  -- Markers are drawn per minor version: only a minor bump may change scores (DESIGN.md 11d).
+  let minor := fun (r : String) =>
+    match r.splitOn "." with
+    | [a, b, _] => s!"{a}.{b}"
+    | _ => r
+  let revAt := fun (d : String) =>
+    (rows.filter (·.date == d)).back?.map (minor ·.rev) |>.getD "?"
   let (w, left, right, top, bot) := (1060, 70, 310, 46, 64)
   let h := max 520 (top + 24 + series.size * 18 + bot)
   let plotW := w - left - right
@@ -101,7 +107,8 @@ def renderChart (rows : Array Row) (metric : String) : String := Id.run do
     out := out.push s!"<rect x=\"{x0}\" y=\"{top}\" width=\"{x1 - x0}\" height=\"{plotH}\" fill=\"{fill}\"/>"
     out := out.push s!"<line x1=\"{x0}\" y1=\"{top}\" x2=\"{x0}\" y2=\"{top + plotH}\" stroke=\"#c7d2de\" stroke-width=\"1\"/>"
     out := out.push s!"<text x=\"{(x0 + x1) / 2}\" y=\"{top - 12}\" font-size=\"12\" fill=\"#44546a\" text-anchor=\"middle\">Lean {esc v}</text>"
-  -- Novacula version markers: a dashed line where the version changes, labeled inside the plot.
+  -- Novacula version markers: a dashed line where the minor version changes, labeled inside the
+  -- plot.
   for i in [0:n] do
     let r := revAt dates[i]!
     if i == 0 || revAt dates[i - 1]! != r then
