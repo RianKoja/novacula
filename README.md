@@ -41,12 +41,14 @@ behind each rule, and the open questions.
 
 ## Metric history
 
-The declarations in `targets.txt` are scored daily and appended to `data/history.csv`. Each shaded
-band is one Lean version and each dashed marker starts a Novacula version: a step at a band edge
+The declarations in `targets.txt` are scored daily with the latest release on the latest stable
+Lean, in the separate [novacula-history](https://github.com/RianKoja/novacula-history) repository
+so the daily runs add no commits here. Each shaded band is one Lean version and each dashed marker
+starts a Novacula minor version: a step at a band edge
 or marker comes from the toolchain or the tool, while movement between them comes from the proofs
 or from changes in the fame of what they cite.
 
-![Metric history](docs/history.svg)
+![Metric history](https://raw.githubusercontent.com/RianKoja/novacula-history/main/history.svg)
 
 ## Use in a Lean project
 

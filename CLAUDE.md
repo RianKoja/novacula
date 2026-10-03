@@ -49,29 +49,25 @@ To score another project, rebuild Novacula with its `lean-toolchain` and run the
 
 ## History tracking
 
-`make track` appends one row per declaration in `targets.txt` to `data/history.csv`, tagged with
+`make track` appends one row per declaration in `targets.txt` to `data/history.csv` (untracked
+here), tagged with
 the date and Novacula version (from `lakefile.toml`) passed in by the Makefile. The tool never
 reads a clock, so an old version reproduces its old rows. Reruns on the same date and version are
 no-ops.
-`make track` then redraws `docs/history.svg`, the chart shown in README.md: one line per tracked
-declaration, one shaded vertical band per Lean version, a dashed marker where the Novacula
-version changes, integer coordinates so the same history
-renders identical bytes. `Module *` in `targets.txt` tracks every theorem under `Module`.
-The daily Kestra flow `kbm.novacula/novacula-daily` runs this on the latest stable Lean and
-pushes the result.
+`make track` then redraws `docs/history.svg`: one line per tracked declaration, one shaded
+vertical band per Lean version, a dashed marker where the Novacula minor version changes, integer
+coordinates so the same history renders identical bytes. `Module *` in `targets.txt` tracks every
+theorem under `Module`. The published history lives in the `RianKoja/novacula-history`
+repository, whose daily workflow runs `make track` with the latest release on the latest stable
+Lean and commits the result there. The chart in README.md is read from that repository.
 
 ## Releases
 
 Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, ...; `feat!:` for breaking
 changes). release-please reads them on every push to `main` and keeps a release PR open that
 bumps the version in `lakefile.toml`, `README.md`, `DESIGN.md` and `CHANGELOG.md`. Merging that PR
-tags the release. Never edit the version by hand. `track:` commits from the daily flow are not
-conventional and do not trigger releases.
-
-## Two clones push to main
-
-The daily flow works in its own clone (`~/Desktop/selfhosting/novacula/work`) and pushes the
-day's data and chart. Always `git pull --rebase origin main` before pushing from a dev clone.
+tags the release. Never edit the version by hand. Pick the commit type by DESIGN.md 11d: a change
+that can alter any score is `feat:` (minor), never `fix:`.
 
 ## Tests
 

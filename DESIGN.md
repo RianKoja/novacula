@@ -208,7 +208,7 @@ A single Lake package, `Novacula`:
 
 ## 11b. History tracking
 
-`targets.txt` lists tracked declarations, remarkable results first. A line `Module Decl` tracks one declaration; `Module *` tracks every user-written theorem of `Module` and its submodules. `make track` appends their raw metrics and cost to `data/history.csv` with the date and Novacula version. Rows carry the Lean version because scores are comparable only within one version (principle 3). A row has an empty cost when the gate rejected it. `docs/history.svg` draws one line per declaration, one shaded band per Lean version and a dashed marker where the Novacula version changes, on a log scale once values span more than two decades. All coordinates are integers, so the same history renders identical bytes.
+`targets.txt` lists tracked declarations, remarkable results first. A line `Module Decl` tracks one declaration; `Module *` tracks every user-written theorem of `Module` and its submodules. `make track` appends their raw metrics and cost to `data/history.csv` with the date and Novacula version. The published history is kept in the separate `RianKoja/novacula-history` repository, whose own daily workflow runs `make track` with the latest release on the latest stable Lean; reason: daily commits would bury this repository's code history, and scoring only releases makes chart steps line up with version markers. Rows carry the Lean version because scores are comparable only within one version (principle 3). A row has an empty cost when the gate rejected it. `docs/history.svg` draws one line per declaration, one shaded band per Lean version and a dashed marker where the Novacula minor version changes, on a log scale once values span more than two decades. All coordinates are integers, so the same history renders identical bytes.
 
 ## 11c. GitHub Action
 
@@ -232,7 +232,16 @@ plus a `schedule` trigger for periodic reruns. The action builds the project, re
 
 ## 11d. Versioning
 
-Decision: Novacula has semantic versions, cut automatically by release-please from Conventional Commit messages on `main`. The version lives in `lakefile.toml`; release-please bumps it there and in the usage snippets of README.md and this file, writes `CHANGELOG.md`, and tags `vX.Y.Z` when its release PR is merged. Breaking changes bump the minor version while below 1.0. The `novaculaRev` column of every history row holds this version (`v0.2.1`), read from `lakefile.toml`, both in `make track` and in the action. Reason: scores are comparable only within one Novacula version, as within one Lean version, so the badge and chart must show it; a commit SHA in the column would change on every commit and say nothing about compatibility, and a workflow that pins the action by SHA would otherwise record only the SHA. Rows written before this decision carry a commit SHA.
+Decision: Novacula has semantic versions, cut automatically by release-please from Conventional Commit messages on `main`. The version lives in `lakefile.toml`; release-please bumps it there and in the usage snippets of README.md and this file, writes `CHANGELOG.md`, and tags `vX.Y.Z` when its release PR is merged. Breaking changes bump the minor version while below 1.0. The `novaculaRev` column of every history row holds this version (`v0.2.1`), read from `lakefile.toml`, both in `make track` and in the action. Reason: scores are comparable only within one Novacula version, as within one Lean version, so the badge and chart must show it; a commit SHA in the column would change on every commit and say nothing about compatibility, and a workflow that pins the action by SHA would otherwise record only the SHA. Rows written before this decision were relabeled `v0.0.0`.
+
+Release policy (decision): a version number states whether scores stay comparable.
+
+- **Minor** (`feat:`): any change that can alter a score or a gate verdict, however small: cost formula, metrics, fame, corpus handling, gate rules, sanctioned axioms, default parameters. Also new features. The chart marks only minor versions, so a marker always means "scores before and after this line are not comparable".
+- **Patch** (`fix:`): changes that provably leave every score unchanged but alter behavior users see: action plumbing, CLI, error messages, performance, chart and badge rendering.
+- **No release** (`docs:`, `ci:`, `test:`, `chore:`, `refactor:` with byte-identical output): nothing a user of a tag would notice.
+- **Breaking** (`feat!:`): incompatible changes to action inputs, CLI or the history CSV. Below 1.0 they bump the minor version too.
+
+Reason: a pinned tag must say whether a history can be continued; patch releases are safe to take without a marker, minor releases restart comparability.
 
 ## 12. Open questions
 
