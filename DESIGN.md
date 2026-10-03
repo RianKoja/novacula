@@ -222,7 +222,7 @@ Decision: projects adopt Novacula with one job in their CI:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - uses: RianKoja/novacula@v0.3.0
+      - uses: RianKoja/novacula@v0.3.1
         with:
           theorems: all        # or a list of title theorems
 ```
