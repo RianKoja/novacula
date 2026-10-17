@@ -67,12 +67,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - uses: RianKoja/novacula@v0.3.0
+      - uses: RianKoja/novacula@v0.3.1
         with:
           theorems: all   # or title theorems: "Foo.main_theorem Foo.corollary"
 ```
 
-Pin the action to a commit SHA (`RianKoja/novacula@<sha> # v0.3.0`) if the repository requires it;
+Pin the action to a commit SHA (`RianKoja/novacula@<sha> # v0.3.1`) if the repository requires it;
 Renovate and Dependabot update such pins when a new tag is released. The action pins the
 actions it uses itself to commit SHAs as well.
 <!-- x-release-please-end -->

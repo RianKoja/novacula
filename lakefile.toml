@@ -1,5 +1,5 @@
 name = "novacula"
-version = "0.3.0"
+version = "0.3.1"
 defaultTargets = ["novacula"]
 
 [[lean_lib]]
