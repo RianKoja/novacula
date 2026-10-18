@@ -13,3 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+
+      # Floating tags: `vX` and `vX.Y` always point at the latest release of that line, so users
+      # can follow releases with `RianKoja/novacula@v0` (DESIGN.md 11d).
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        if: ${{ steps.release.outputs.release_created }}
+      - name: Move the floating tags
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          TAG: ${{ steps.release.outputs.tag_name }}
+          MAJOR: ${{ steps.release.outputs.major }}
+          MINOR: ${{ steps.release.outputs.minor }}
+        run: |
+          git fetch -q origin "refs/tags/$TAG:refs/tags/$TAG"
+          git tag -f "v$MAJOR" "$TAG"
+          git tag -f "v$MAJOR.$MINOR" "$TAG"
+          git push -f origin "v$MAJOR" "v$MAJOR.$MINOR"
