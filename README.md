@@ -73,8 +73,8 @@ jobs:
 ```
 
 `v0` moves to every release, so the project follows Novacula without edits; the chart marks each
-minor version, where scores may change. To freeze a version instead, use `@v0.3.0`, or pin a commit
-SHA (`RianKoja/novacula@<sha> # v0.3.0`) if the repository requires it; Renovate and Dependabot
+minor version, where scores may change. To freeze a version instead, use `@v0.3.1`, or pin a commit
+SHA (`RianKoja/novacula@<sha> # v0.3.1`) if the repository requires it; Renovate and Dependabot
 update such pins when a new tag is released. The action pins the
 actions it uses itself to commit SHAs as well.
 <!-- x-release-please-end -->
