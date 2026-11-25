@@ -222,7 +222,7 @@ Decision: projects adopt Novacula with one job in their CI:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - uses: RianKoja/novacula@v0.3.0
+      - uses: RianKoja/novacula@v0
         with:
           theorems: all        # or a list of title theorems
 ```
@@ -240,6 +240,8 @@ Release policy (decision): a version number states whether scores stay comparabl
 - **Patch** (`fix:`): changes that provably leave every score unchanged but alter behavior users see: action plumbing, CLI, error messages, performance, chart and badge rendering.
 - **No release** (`docs:`, `ci:`, `test:`, `chore:`, `refactor:` with byte-identical output): nothing a user of a tag would notice.
 - **Breaking** (`feat!:`): incompatible changes to action inputs, CLI or the history CSV. Below 1.0 they bump the minor version too.
+
+After each release the workflow also moves the floating tags `vX` and `vX.Y` to it; projects that use `@v0` follow every release, and the chart's minor-version markers show where scores may have changed.
 
 Reason: a pinned tag must say whether a history can be continued; patch releases are safe to take without a marker, minor releases restart comparability.
 
